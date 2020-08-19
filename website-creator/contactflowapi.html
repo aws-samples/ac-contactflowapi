@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Amazon Connect - Instance and Contact Flow API's</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="utf-8" http-equiv="encoding">
+    <script src=https://cdn.jsdelivr.net/npm/jquery@3.5/dist/jquery.min.js></script>
+	<script src="js/connectservice.js"></script>    
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <script src="js/connectflows.js"></script>
+    <script src="js/aws-sdk.min.js"></script>
+	<script src=https://cdn.jsdelivr.net/npm/dna.js@1.6/dist/dna.min.js></script>
+	<script src=https://cdn.jsdelivr.net/npm/web-ignition@1.2/dist/library.min.js></script>
+    <link rel=stylesheet href=https://cdn.jsdelivr.net/npm/pretty-print-json@0.2/dist/pretty-print-json.css>
+	<script src=https://cdn.jsdelivr.net/npm/pretty-print-json@0.2/dist/pretty-print-json.js></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>	
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/sl-1.3.1/datatables.min.css"/>
+ 	<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.21/sl-1.3.1/datatables.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	
+<style>
+    #section-contact-flow-main {
+        padding: 10px;
+        max-width: 300px;
+        height: 900px;
+        margin-left: 0px;
+        float: left;
+        overflow: auto;
+    }
+    #section-replacements {
+        padding: 10px;
+        max-width: 650px;
+        height: 900px;
+        margin-left: 0px;
+        float: left;
+        overflow: auto;
+    }
+    #section-contact-flows {
+        padding: 10px;
+        max-width: 800px;
+        height: 900px;
+        margin-left: 0px;
+        float: left;
+    }
+    #section-contact-flows2 {
+        padding: 10px;
+        max-width: 800px;
+        height: 900px;
+        margin-left: 0px;
+        float: left;
+    }
+    
+    #section-instance-main {
+        padding: 10px;
+        max-width: 400px;
+        height: 900px;
+        margin-left: 0px;
+        float: left;
+        overflow: auto;
+        display: none;
+    }
+    
+    #section-json-output {
+        padding: 10px;
+        max-width: 550px;
+        height: 900px;
+        margin-left: 0px;
+        float: left;
+    }
+	#instancesFormatted{
+		white-space: break-spaces;
+		word-break: break-word;
+	}
+	#instancesDivFormatted{
+		overflow: scroll;
+	    height: 830px;
+	    background-color: #fbf7f7;
+	}	    
+.cfs-ccp-wrapper {
+    top: 0;
+    bottom: 0;
+    left: 9%;
+    margin: auto;
+    position: absolute;
+    height: calc(100vh - 80px);
+    padding-top: 30px;
+    z-index: 1;
+}
+#cfs-ccp-container {
+    display: none;
+}
+.cfs-ccp-container {
+    height: 465px;
+    width: 900px;
+    transition: 300ms;
+}
+.cfs-ccp-iframe-container {
+    border-radius: 4px;
+    box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.08), 0 40px 120px 0 rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.lblCfs {
+    color: black;
+    display: flex;
+    text-align: center;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+}
+.lblCfs::before {
+  content: '-';
+  display: flex;
+  border-radius: 100px;
+  height: 40px;
+  width: 40px;
+  background-color: #EA7AF4;
+  margin-right: 6px;
+  align-items: center;
+  justify-content: center;
+  line-height: 20px;
+}
+
+.lblCfs::after {
+  content: 'JSON';
+  white-space: nowrap;
+}
+.lblJSON{
+    padding: 20px 10px;
+    font-weight: bold;
+    color: #000;
+    border: 1px solid #ad8e8e;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    margin-bottom: 0 !important;
+    margin-bottom: 20px;
+    background-color: #fbf7f7;
+}
+#cfs-ccp-container:checked ~ .cfs-ccp-container {
+  height: 50px;
+  width: 50px;
+  visibility: hidden;
+  transition: 300ms;
+}
+
+#cfs-ccp-container:checked ~ label::before {
+  content: '+';
+}
+
+#cfs-ccp-container:checked ~ label::after {
+  content: 'JSON';
+}
+td{
+	text-align: right;
+}
+td.text-center{
+	text-align: center;
+}
+td.chk-center{
+	width: inherit;
+	text-align: center;
+}	    
+.chk{
+	width: inherit;
+}
+#tblARNMapping {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#tblARNMapping td, #tblARNMapping th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#tblARNMapping tr:nth-child(even){background-color: #f2f2f2;}
+
+#tblARNMapping tr:hover {background-color: #ddd;}
+
+#tblARNMapping th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  color: black;
+}
+</style>
+<style> 
+ * {box-sizing: border-box;}
+</style>	
+
+</head>
+
+<body>
+
+<!--navbar div with the id-->
+	<section id="section-contact-flow-main">
+		<!--  <div class="cfs-ccp-wrapper">
+	         <input type="checkbox" id="cfs-ccp-container" />
+	         <label class="lblCfs" for="cfs-ccp-container"></label>
+	         <div class="cfs-ccp-container">
+	           <div id="ccp" class="cfs-ccp-iframe-container">
+				<legend class='lblJSON'>JSON Output</legend>
+					<div id="instancesDivFormatted">
+						<pre id="instancesFormatted"></pre>
+					</div>
+	           		</div>
+	         </div>
+	    </div>-->	
+	
+		<form>
+         <fieldset>
+            <legend>Amazon Connect Contact Flow APIs</legend>
+               <div>
+               	  <input type="button" id="awsConfiguration" value="AWS Configurations">
+                  <input type="button" id="getAllFlows" value="Get all contact flows">
+                  <!-- <input type="button" id="updateName" value="Update contact flow name"> -->
+                  <!-- <input type="button" id="describeContactFlow" value="Describe flow"> -->
+                  <!-- <input type="button" id="updateContactFlow" value="Update contact flow">  -->
+                  <input type="button" id="createContactFlow" value="Create contact flow">
+               </div>
+         </fieldset>
+         </form>
+         
+	</section>
+
+	<section id="section-contact-flows">
+		<legend>Instance : <span id='sourceInstanceName'></span></legend>
+		<!--  <input type="text" id="flowName" value="">
+		<input type="text" id="flowType" value="" readonly>-->
+		<div>
+			<input type="button" id="btnBackupAll" style="width: 200px;" value ="Backup Selected Flows">
+			<span style="position: relative;top: 10px;padding-left: 20px;">
+				<input type="checkbox" id="chkBackupAll" name="chkBackupAll" style="width: 30px;padding-left: 50px;">
+				<label for="chkBackupAll" style="padding: 0px 0 0;width: 70px;float: inherit;">Select all</label>
+			</span>
+		</div> 
+		<div style="height: 90%;  overflow: scroll;">
+			<table id="contactFlowList" style="width:100%;border:1px;height:80%" class="cell-border compact stripe" /></table>
+		</div>
+	</section>
+
+	<section id="section-contact-flows2">
+		<legend>Instance : <span id='targetInstanceName'></span></legend>
+		<!-- <input type="text" id="flowName2" value="">
+		<input type="text" id="flowType2" value="" readonly> -->
+		<div style="padding-bottom: 48px;"><span></span></div>
+		<!--  <div>
+			<input type="button" id="btnBackupAll1" style="width: 200px;" value ="Backup Selected Flows">
+			<span style="position: relative;top: 10px;padding-left: 20px;">
+				<input type="checkbox" id="chkBackupAll1" name="chkBackupAll1" style="width: 30px;padding-left: 50px;">
+				<label for="chkBackupAll1" style="padding: 0px 0 0;width: 70px;float: inherit;">Select all</label>
+			</span>
+		</div>--> 
+		
+		<div style="height: 90%;  overflow: scroll;">
+			<table id="contactFlowList2" style="width:100%;border:1px;height:80%" class="cell-border compact stripe" /></table>
+		</div>
+	</section>
+	
+	<div id="confirmDialog" title="Create new flow?">
+	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Cannot find flow with same name in the target instance, do you want to create new flow?</p>
+	</div>	
+	<div id="dialog" title="Waiting">
+	  <p>Waiting for server to respond</p>
+	</div>
+	<div id="dialogJSON" title="JSON Output">
+			<div id="instancesDivFormatted">
+				<pre id="instancesFormatted"></pre>
+			</div>
+	</div>
+	
+	<div id="resultDialog" title="API Result">
+	  	<span id="resultSpan"></span>
+	</div>
+
+	<div id="updateFlowDialog" title="Flow details">
+	    <form>
+	    	<input name="updateFlowName" type="hidden" id="updateFlowName">
+	    </form>
+	  	<div id="updateFlowDialogTable">
+	  		<table id = 'tblARNMapping'>
+	  			<thead>
+	  				<tr>
+		  				<th>Source ARN</th>
+		  				<th>Target ARN</th>
+		  				<th>Type</th>
+	  				</tr>
+	  				<tr>
+	  					<td>-</td><td>-</td><td>-</td>
+	  				</tr>
+	  			</thead>
+	  			<tbody>
+	  			</tbody>
+	  		</table>
+	  	</div>
+	  	<button class="btn" type="button" id="btnUpdateContactFlow" style="width: 200px;"> Update Contact Flow </button>
+	</div>
+
+	<div id="renameDialog" title="Change name of contact flow">
+     	<form  name="changeNameForm" id="changeNameForm" autocomplete="on">
+  	        <fieldset class="config-info">
+	       		<legend>Enter the new name for the contact flow</legend>
+	       		   <div>
+			          <table>
+			            <tbody>
+			              <tr>
+			                <td>
+			                  <label for="dlgOldName">Old name : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgOldName" type="text" id="dlgOldName" placeholder="" readonly>
+			                </td>
+			                <td>
+			                  <label for="dlgNewName">Name : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgNewName" type="text" id="dlgNewName" placeholder="">
+			                </td>
+			                </tr>
+			             </tbody>
+			          </table>
+			       </div> 
+			  </fieldset>
+			  <button class="btn" type="button" id="btnRenameContactFlow" style="width: 200px;"> Rename Contact Flow </button>
+		</form>
+	</div>
+
+	<div id="configDialog" title="AWS IAM Credentials">
+     	<form  name="AWSIAMInfo" id="AWSIAMInfo" autocomplete="on">
+  	        <fieldset class="config-info">
+	       		<legend>Enter the AWS Credentials for Source Instance</legend>
+	       		   <div>
+			          <table>
+			            <tbody>
+			              <tr>
+			                <td>
+			                  <label for="dlgSourceAccessKey">Access Key : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgSourceAccessKey" type="text" id="dlgSourceAccessKey" placeholder="Access Key">
+			                </td>
+			                <td>
+			                  <label for="dlgSourceSecretKey">Secret Key : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgSourceSecretKey" type="text" id="dlgSourceSecretKey" placeholder="Secret Key">
+			                </td>
+			                </tr>
+			                <tr>
+			                <td>
+			                 <label for="dlgSourceInstance">Instance ID : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgSourceInstance" type="text" id="dlgSourceInstance" placeholder="Instance ID">
+			                </td>
+			                <td>
+			                	<label for="dlgSourceRegion">Region : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgSourceRegion" type="text" id="dlgSourceRegion" placeholder="Region">
+			                </td>
+			                </tr>
+			                <tr>
+			                <td>
+		                	  <label for="dlgSourceBackupDDB">Backup DDB : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgSourceBackupDDB" type="text" id="dlgSourceBackupDDB" placeholder="Dynamo DB ">
+			                </td>
+			                <td>
+			                	<label for="dlgSourceARNMapDDB">ARN Mapping : </label>
+			                </td>
+			                <td >
+			                  <input name="dlgSourceARNMapDDB" type="text" id="dlgSourceARNMapDDB" placeholder="DynamoDB">
+			                </td>
+			                
+			                </tr>
+			                </tbody>
+			                </table>
+			         </div>
+			         </fieldset>
+  	        <fieldset class="config-info">
+	       		<legend>Enter the AWS Credentials for Target Instance</legend>
+	       		   <div>
+			                
+			              <table>
+			              <tbody>  
+			              <tr>
+			                <td>
+			                  <label for="dlgTargetAccessKey">Access Key : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgTargetAccessKey" type="text" id="dlgTargetAccessKey" placeholder="Access Key">
+			                </td>
+			                <td>
+			                  <label for="dlgTargetSecretKey">Secret Key : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgTargetSecretKey" type="text" id="dlgTargetSecretKey" placeholder="Secret Key">
+			                </td>
+			                </tr>
+			                <tr>
+			                <td>
+			                	<label for="dlgTargetInstance">Instance ID : </label>
+			                </td>
+			                <td >
+			                  <input name="dlgTargetInstance" type="text" id="dlgTargetInstance" placeholder="Instance ID">
+			                </td>
+			                <td>
+			                	<label for="dlgTargetRegion">Region : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgTargetRegion" type="text" id="dlgTargetRegion" placeholder="Region">
+			                  <input name="dlgTargetBackupDDB" type="hidden" id="dlgTargetBackupDDB" placeholder="DynamoDB" value="1234">
+			                </td>			                
+			                </tr>
+			             </tbody>
+			           </table>
+			       </div>
+			     </fieldset>
+			     <span id="spnAWSMessage" style="color: red;font-weight: bold;float:left"></span><button class="btn" type="button" id="btnConfiguration" style="width: 200px;float:right;"> Save Configurations </button>
+			     
+			   </form>   
+	  	
+	</div>
+	
+	<div id="contactFlowContentdialog" title="Create new contact flow">
+     	<form  name="contactInfo" id="contactInfo" autocomplete="on">
+  	        <fieldset class="schedule-info">
+	       		<legend><span style="display: inline-block;padding: 10px;">Select the instance : </span><select id="dlgSelectInstance"></select></legend>
+	       		   <div>
+			          <table>
+			            <tbody>
+			              <tr>
+			                <td>
+			                  <label for="dlgContactFlowName">Name : </label>
+			                </td>
+			                <td>
+			                  <input name="dlgContactFlowName" type="text" id="dlgContactFlowName" placeholder="Contact flow name">
+			                </td>
+			                <td style="padding-bottom: 10px">
+			                  <label for="dlgContactFlowType"  style="text-align:right;">Type : </label>
+			                </td>
+			                <td>
+			                  <select name="dlgContactFlowType" id="dlgContactFlowType">
+						        <option value="CONTACT_FLOW">CONTACT_FLOW</option>
+						        <option value="CUSTOMER_QUEUE">CUSTOMER_QUEUE</option>
+						        <option value="CUSTOMER_HOLD">CUSTOMER_HOLD</option>
+						        <option value="CUSTOMER_WHISPER">CUSTOMER_WHISPER</option>
+						        <option value="AGENT_HOLD">AGENT_HOLD</option>
+						        <option value="AGENT_WHISPER">AGENT_WHISPER</option>
+						        <option value="OUTBOUND_WHISPER">OUTBOUND_WHISPER</option>
+						        <option value="AGENT_TRANSFER">AGENT_TRANSFER</option>
+						        <option value="QUEUE_TRANSFER">QUEUE_TRANSFER</option>
+								</select>
+			                </td>			                			                
+			              </tr>
+			              <tr>
+			                <td>
+			                  <label for="dlgContactFlowDescription">Description : </label>
+			                </td>
+			                <td  colspan="3">
+			                  <input name="dlgContactFlowDescription" type="text" id="dlgContactFlowDescription" placeholder="Contact flow description" style="width:100%;">
+			                </td>			                			                
+			              </tr>
+			              <tr>
+			              <td colspan="4" style="padding-top: 15px;padding-bottom: 10px;"> Paste contact flow in well formatted JSON payload below textbox: </td>
+			              </tr>
+	       		   		</tbody>
+	       		   	  </table>
+	       		   </div>	
+	               <div>
+	                   <textarea id="contactFlowJSON" name="contactFlowJSON" rows="16" cols="800" style="width:100%;"></textarea>
+	                   <!--<input name="contactFlowJSON" type="text" id="contactFlowJSON" placeholder="Contact flow content" maxlength="10000" style="width: 100%;height: 300px;">  -->
+	               </div>
+	               <button class="btn" type="button" id="btnCreateContactFlow" style="width: 200px;"> Create contact flow </button>
+			</fieldset>
+		</form>
+					
+	</div>
+	<script>
+	$( document ).ready(function() {
+		$('#cfs-ccp-container').click();		
+	});
+	</script>	
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+    "files": [
+        "./contactflowapi.html",
+        "./css/style.css",
+        "./js/aws-sdk.min.js",
+		"./js/connectservice.js",
+		"./js/connectflows.js"
+    ]
+}
