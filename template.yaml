@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >
-  "Updating contact attributes in Amazon Connect using AWS SDK and API Gateway"
+  "Amazon Connect contact flow api's demo"
 
 Mappings: 
   FunctionMap:
