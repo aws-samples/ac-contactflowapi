@@ -1,10 +1,8 @@
-
 'use strict';
 
 let AWS = require('aws-sdk');
 let s3 = new AWS.S3();
 const fs = require('fs');
-//var _downloadKey = 'agentextensions/latest/web-site-manifest.json';
 const _downloadLocation = './web-site-manifest.json';
 
 /**
@@ -48,14 +46,7 @@ let websiteHelper = (function() {
                             return cb(err, null);
                         }
                         console.log(result);
-                        //return cb(null, createResult);
-                        removePublicAccess(destS3Bucket, 
-                        function(err, createResult) {
-                            if (err) {
-                                return cb(err, null);
-                            }
-                            return cb(null, createResult);
-                        });
+                        return cb(null, result);
                     });
             }
 
@@ -135,31 +126,6 @@ let websiteHelper = (function() {
             cb(null, [index, 'files copied'].join(' '));
         }
     }
-
-    let removePublicAccess = function (bucketName, cb){
-        var params = {
-          Bucket: bucketName,
-          PublicAccessBlockConfiguration: { /* required */
-            BlockPublicAcls: true,
-            BlockPublicPolicy: true,
-            IgnorePublicAcls: true,
-            RestrictPublicBuckets: true
-          }
-        };
-        s3.putPublicAccessBlock(params, function(err, data) {
-          if (err) {
-              console.log(err, err.stack); // an error occurred
-              cb(err, null);
-          }
-          else{
-              console.log('Successfully removed public access');
-              console.log(data);           // successful response
-              cb(null, data);
-          }     
-          
-        })    
-    }
-    
     return websiteHelper;
 
 })();

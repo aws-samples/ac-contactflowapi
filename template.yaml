@@ -1,6 +1,6 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: Recording API demo for Amazon Connect
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  "Updating contact attributes in Amazon Connect using AWS SDK and API Gateway"
 
 Mappings: 
   FunctionMap:
@@ -9,7 +9,8 @@ Mappings:
           S3Key: "2020/contactflows/"
  
 Parameters:
-  CADS3BucketForWebSite:
+  CFS3BucketForWebSite:
+    Default:  "contactflowapi-website"
     Type: String
     AllowedPattern: '(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)'
     ConstraintDescription: 'Invalid S3 Bucket name'
@@ -17,11 +18,13 @@ Parameters:
 
   backupDDBTable:
     Type: String
+    Default:  "contactflows"
     Description: >
         The name of the DynamoDB Table contact flows will be backed up (Ensure you do not have a table with this name already).
 
   arnMappingDDBTable:
     Type: String
+    Default:  "contactflowmapping"
     Description: >
         The name of the DynamoDB Table which maintains ARN mappings to target environment (Ensure you do not have a table with this name already).
             
@@ -31,7 +34,7 @@ Metadata:
       - Label:
           default: Amazon S3 Configuration 
         Parameters:
-          - CADS3BucketForWebSite
+          - CFS3BucketForWebSite
       - Label:
           default: Amazon DynamoDB Configuration 
         Parameters:
@@ -39,7 +42,7 @@ Metadata:
           - arnMappingDDBTable
           
     ParameterLabels:
-      CADS3BucketForWebSite:
+      CFS3BucketForWebSite:
         default: Website Bucket Name
       backupDDBTable:
         default: Backup table 
@@ -52,7 +55,7 @@ Outputs:
       Value: !Join
         - ''
         - - 'https://'
-          - !GetAtt [CADCloudFrontDistribution, DomainName]
+          - !GetAtt [CFCloudFrontDistribution, DomainName]
           - '/connectflows.html'
       
   DDBForBackup:
@@ -155,21 +158,21 @@ Resources:
     createWebSiteS3Bucket:
         Type: 'AWS::S3::Bucket'
         Properties:
-            BucketName: !Ref CADS3BucketForWebSite
+            BucketName: !Ref CFS3BucketForWebSite
             PublicAccessBlockConfiguration:
-                BlockPublicAcls: False
-                BlockPublicPolicy: False
-                IgnorePublicAcls: False
-                RestrictPublicBuckets: False
+                BlockPublicAcls: True
+                BlockPublicPolicy: True
+                IgnorePublicAcls: True
+                RestrictPublicBuckets: True
             WebsiteConfiguration:
                 IndexDocument: connectflows.html
                 ErrorDocument: error.html
  
  
-    CADs3BucketPolicy:
+    CFS3BucketPolicy:
         Type: AWS::S3::BucketPolicy
         DependsOn:
-            - CADCloudFrontDistributionAccessIdentity
+            - CFCloudFrontDistributionAccessIdentity
         Properties:
             Bucket: !Ref createWebSiteS3Bucket
             PolicyDocument:
@@ -180,17 +183,17 @@ Resources:
                         Effect: "Allow"
                         Principal:
                             CanonicalUser:
-                                Fn::GetAtt: [ CADCloudFrontDistributionAccessIdentity , S3CanonicalUserId ]
+                                Fn::GetAtt: [ CFCloudFrontDistributionAccessIdentity , S3CanonicalUserId ]
                         Resource:
                             !Sub ${createWebSiteS3Bucket.Arn}/contactflowsite/*
 
-    CADCloudFrontDistributionAccessIdentity:
+    CFCloudFrontDistributionAccessIdentity:
         Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
         Properties:
           CloudFrontOriginAccessIdentityConfig:
             Comment: 'CloudFront endpoint for contact flows s3'
             
-    CADCloudFrontDistribution:
+    CFCloudFrontDistribution:
         Type: AWS::CloudFront::Distribution
         Properties:
           DistributionConfig:
@@ -198,16 +201,16 @@ Resources:
             - DomainName:
                 !Join
                     - ''
-                    - - !Ref CADS3BucketForWebSite
+                    - - !Ref CFS3BucketForWebSite
                       - .s3.amazonaws.com
-              Id: !Ref CADS3BucketForWebSite
+              Id: !Ref CFS3BucketForWebSite
               OriginPath: '/contactflowsite'
               S3OriginConfig:
                 OriginAccessIdentity:
                     !Join
                         - ''
                         - - 'origin-access-identity/cloudfront/'
-                          - !Ref CADCloudFrontDistributionAccessIdentity
+                          - !Ref CFCloudFrontDistributionAccessIdentity
             Enabled: 'true'
             Logging:
                 Bucket: !GetAtt createWebSiteS3Bucket.DomainName
@@ -224,7 +227,7 @@ Resources:
                     - PATCH
                     - POST
                     - PUT
-                TargetOriginId: !Ref CADS3BucketForWebSite
+                TargetOriginId: !Ref CFS3BucketForWebSite
                 ForwardedValues:
                     QueryString: true
                     Cookies:
@@ -236,7 +239,7 @@ Resources:
                     Locations:
                         - US
 
-    CADWebsiteCreatorRole:
+    CFWebsiteCreatorRole:
         Type: "AWS::IAM::Role"
         Properties:
           AssumeRolePolicyDocument:
@@ -276,7 +279,7 @@ Resources:
                           - - 'arn:'
                             - !Ref 'AWS::Partition'
                             - ':s3:::'
-                            - !Ref CADS3BucketForWebSite
+                            - !Ref CFS3BucketForWebSite
                             - '/*'
                   -
                     Effect: "Allow"
@@ -288,7 +291,7 @@ Resources:
                           - - 'arn:'
                             - !Ref 'AWS::Partition'
                             - ':s3:::'
-                            - !Ref CADS3BucketForWebSite
+                            - !Ref CFS3BucketForWebSite
                   -
                     Effect: "Allow"
                     Action:
@@ -308,7 +311,7 @@ Resources:
         Description:  >
             AWS Lambda Function that will create the website and upload it to the S3 bucket
         Handler: "index.handler"
-        Role: !GetAtt CADWebsiteCreatorRole.Arn
+        Role: !GetAtt CFWebsiteCreatorRole.Arn
         Runtime: "nodejs12.x"
         MemorySize: 256
         Timeout: 120
@@ -321,8 +324,5 @@ Resources:
             ServiceToken:  !GetAtt webSiteCreator.Arn
             customAction: configureWebsite
             Region: !Ref AWS::Region
-            sourceS3Bucket: "amazon-connect-blogs2"
-            sourceS3key: "2020/contactflows"
-            destS3Bucket: !Ref CADS3BucketForWebSite
+            destS3Bucket: !Ref CFS3BucketForWebSite
             destS3KeyPrefix: contactflowsite
-            manifestLocation: "2020/contactflows/web-site-manifest.json"

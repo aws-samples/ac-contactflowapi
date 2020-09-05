@@ -230,11 +230,13 @@ function setupAll(){
 }*/
 
 function getInstanceNames(){
-	describeInstance(dlgSourceAccessKey, dlgSourceSecretKey, dlgSourceRegion, dlgSourceInstance,1).then(
+	$('#sourceInstanceName').text(dlgSourceInstance) ;
+	$('#targetInstanceName').text(dlgTargetInstance);
+	/*describeInstance(dlgSourceAccessKey, dlgSourceSecretKey, dlgSourceRegion, dlgSourceInstance,1).then(
     		() => {
     			describeInstance(dlgTargetAccessKey, dlgTargetSecretKey, dlgTargetRegion, dlgTargetInstance,2);
     		}
-		);
+		);*/
 }
 
 function backupContactFlows(listBox){
@@ -325,14 +327,6 @@ function checkClearAll(listBox, checkAll){
 	lb.rows().every(function(index, element) {
 		  var row = $(this.node());
 		  $('input[type="checkbox"]', row).prop('checked', checkAll);
-		  /*var col0 = row.find('td:first-child input[type="checkbox"]');
-		  if (col0.is(':checked')) {
-		      console.log("data: "+data+" is checked");
-		}				  
-		  var statusElement = row.find('td').eq(4); // Index 6 - the 7th column in the table
-		  var isChecked = statusElement.prop('checked');
-		  console.log(row);
-		  console.log(isChecked);*/
 		});
 }
 
@@ -617,7 +611,7 @@ function handleRenameWindow(selectedInstanceId, flowName){
 
 
 function loadConnectAPIs(){
-	var Service = AWS.Service;
+	/*var Service = AWS.Service;
 	var apiLoader = AWS.apiLoader;
 	apiLoader.services['connect'] = {};
 	AWS.Connect = Service.defineService('connect', ['2017-08-08']);
@@ -629,7 +623,7 @@ function loadConnectAPIs(){
 	    },
 	    enumerable: true,
 	    configurable: true
-	});
+	});*/
 	connect = new AWS.Connect({ region: "us-west-2", endpoint: "https://1i6i97swl3.execute-api.us-west-2.amazonaws.com/Prod" }, {apiVersion: '2017-08-08'});
 }
 
@@ -674,8 +668,6 @@ async function getContactFlows2(){
 
 
 async function changeContactFlowName(){
-	//var name = $('#flowName').val();
-	//var params = {InstanceId : '90f463b3-1123-4aed-82b3-94f230911dc2', 'ContactFlowId' : '5511bb83-15fd-4ee2-bd14-0abaeaf1b9a4', 'Name' : name, 'Description' : 'Super cool contact flow'};
 	handleWindow(true, '');
 	var name = $('#dlgNewName').val();
 	var params ;
