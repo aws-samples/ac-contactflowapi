@@ -122,12 +122,9 @@ function setupAll(){
         if ( type === 'row' ) {
         	selectedFlowName = contactFlowsTable.rows( indexes ).data()[0][0];
         	selectedFlowType = contactFlowsTable.rows( indexes ).data()[0][1];
-        	//$('#flowName').val(selectedFlowName);
-        	//$('#flowType').val(selectedFlowType);
             for (var i=0; i< contactFlows.length; i++) {
             	if(selectedFlowName == contactFlows[i].Name){
             		selectedFlowID = contactFlows[i].Id;
-            		//getContactFlowDetails(dlgSourceAccessKey, dlgSourceSecretKey, dlgSourceRegion, dlgSourceInstance, selectedFlowID);
             		break;
             	}
             		
@@ -139,12 +136,9 @@ function setupAll(){
         if ( type === 'row' ) {
         	selectedFlowName2 = contactFlowsTable2.rows( indexes ).data()[0][0];
         	selectedFlowType2 = contactFlowsTable2.rows( indexes ).data()[0][1];
-        	//$('#flowName2').val(selectedFlowName2);
-        	//$('#flowType2').val(selectedFlowType2);
             for (var i=0; i< contactFlows2.length; i++) {
             	if(selectedFlowName2 == contactFlows2[i].Name){
             		selectedFlowID2 = contactFlows2[i].Id;
-            		//getContactFlowDetails(dlgTargetAccessKey, dlgTargetSecretKey, dlgTargetRegion, dlgTargetInstance, selectedFlowID2);
             		break;
             	}
             }
@@ -232,6 +226,15 @@ function setupAll(){
 function getInstanceNames(){
 	$('#sourceInstanceName').text(dlgSourceInstance) ;
 	$('#targetInstanceName').text(dlgTargetInstance);
+	$('#dlgSelectInstance').append($('<option>', {
+	    value: 1,
+	    text: dlgSourceInstance
+	}));
+	$('#dlgSelectInstance').append($('<option>', {
+	    value: 2,
+	    text: dlgTargetInstance
+	}));
+	
 	/*describeInstance(dlgSourceAccessKey, dlgSourceSecretKey, dlgSourceRegion, dlgSourceInstance,1).then(
     		() => {
     			describeInstance(dlgTargetAccessKey, dlgTargetSecretKey, dlgTargetRegion, dlgTargetInstance,2);
@@ -804,7 +807,6 @@ function saveCookie(){
 	dlgTargetSecretKey=$("#dlgTargetSecretKey").val();
 	dlgTargetInstance=$("#dlgTargetInstance").val();
 	dlgTargetRegion=$("#dlgTargetRegion").val();
-	dlgTargetBackupDDB=$("#dlgTargetBackupDDB").val();
 	if(checkAllMandatoryFields()){
 		setCookie("dlgSourceAccessKey", dlgSourceAccessKey,100);
 		setCookie("dlgSourceSecretKey", dlgSourceSecretKey,100 );
@@ -817,7 +819,6 @@ function saveCookie(){
 		setCookie("dlgTargetSecretKey", dlgTargetSecretKey,100);
 		setCookie("dlgTargetInstance", dlgTargetInstance,100);
 		setCookie("dlgTargetRegion", dlgTargetRegion,100);
-		setCookie("dlgTargetBackupDDB", dlgTargetBackupDDB,100);
 		$('#spnAWSMessage').text('');
 		return true;
 	}else{
@@ -875,7 +876,6 @@ function checkCookie()
 	$('#dlgTargetSecretKey').val(dlgTargetSecretKey);
 	$('#dlgTargetInstance').val(dlgTargetInstance);
 	$('#dlgTargetRegion').val(dlgTargetRegion);
-	$('#dlgTargetBackupDDB').val(dlgTargetBackupDDB);
 	return checkAllMandatoryFields();
 }
 
@@ -889,8 +889,7 @@ function checkAllMandatoryFields(){
 			isBlank(dlgTargetAccessKey) || dlgTargetAccessKey.isEmpty() || 
 			isBlank(dlgTargetSecretKey) || dlgTargetSecretKey.isEmpty() || 
 			isBlank(dlgTargetInstance) || dlgTargetInstance.isEmpty() ||
-			isBlank(dlgTargetRegion) || dlgTargetRegion.isEmpty() ||
-			isBlank(dlgTargetBackupDDB) || dlgTargetBackupDDB.isEmpty() 			
+			isBlank(dlgTargetRegion) || dlgTargetRegion.isEmpty()  			
 			){
 		return false;
 	}else
