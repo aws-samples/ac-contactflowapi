@@ -75,42 +75,15 @@ Resources:
           -
             AttributeName: "flowId"
             AttributeType: "S"
-          -
-            AttributeName: "Arn"
-            AttributeType: "S"
-          
         KeySchema:
           -
             AttributeName: "flowId"
             KeyType: "HASH"
-          -
-            AttributeName: "Arn"
-            KeyType: "RANGE"
         ProvisionedThroughput:
           ReadCapacityUnits:
               1
           WriteCapacityUnits:
               1
-        PointInTimeRecoverySpecification:
-            PointInTimeRecoveryEnabled: True
-        SSESpecification:
-            SSEEnabled: True
-        LocalSecondaryIndexes: 
-        - 
-          IndexName: "backupLSI"
-          KeySchema: 
-            - 
-              AttributeName: "flowId"
-              KeyType: "HASH"
-            - 
-              AttributeName: "Arn"
-              KeyType: "RANGE"
-              
-          Projection:
-             NonKeyAttributes:
-               - "flowId"
-               - "Arn"
-             ProjectionType: "INCLUDE"
 
     CFAARNMappingDDBTable:
       Type: AWS::DynamoDB::Table
@@ -120,41 +93,16 @@ Resources:
           -
             AttributeName: "sourceARN"
             AttributeType: "S"
-          -
-            AttributeName: "targetARN"
-            AttributeType: "S"
         KeySchema:
           -
             AttributeName: "sourceARN"
             KeyType: "HASH"
-          -
-            AttributeName: "targetARN"
-            KeyType: "RANGE"
         ProvisionedThroughput:
           ReadCapacityUnits:
               1
           WriteCapacityUnits:
               1
-        PointInTimeRecoverySpecification:
-            PointInTimeRecoveryEnabled: True
-        SSESpecification:
-            SSEEnabled: True
-        LocalSecondaryIndexes: 
-        - 
-          IndexName: "arnmapLSI"
-          KeySchema: 
-            - 
-              AttributeName: "sourceARN"
-              KeyType: "HASH"
-            - 
-              AttributeName: "targetARN"
-              KeyType: "RANGE"
-          Projection:
-             NonKeyAttributes:
-               - "sourceARN"
-               - "targetARN"
-             ProjectionType: "INCLUDE"
-           
+
     createWebSiteS3Bucket:
         Type: 'AWS::S3::Bucket'
         Properties:
