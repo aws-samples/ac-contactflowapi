@@ -12,5 +12,5 @@ Ensure you are in the root folder
 `sam build --use-container`
 
 ##### SAM Deploy:
-`sam deploy template.yaml --s3-bucket REPLACE_ME --stack-name REPLACE_ME --parameter-overrides ParameterKey=CFWebsiteCreatorRole,ParameterValue=REPLACE_ME --capabilities CAPABILITY_IAM`
-      
+
+`sam deploy template.yaml --s3-bucket REPLACE-ME --stack-name sam-cf1 --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=CADS3BucketForWebSite,ParameterValue=REPLACE-ME ParameterKey=backupDDBTable,ParameterValue=REPLACE-ME ParameterKey=arnMappingDDBTable,ParameterValue=REPLACE-ME`
