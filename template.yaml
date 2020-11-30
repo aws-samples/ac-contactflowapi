@@ -56,7 +56,7 @@ Outputs:
         - ''
         - - 'https://'
           - !GetAtt [CFCloudFrontDistribution, DomainName]
-          - '/connectflows.html'
+          - '/contactflowapi.html'
       
   DDBForBackup:
       Description: Endpoint for Cloudfront distribution
@@ -113,7 +113,7 @@ Resources:
                 IgnorePublicAcls: True
                 RestrictPublicBuckets: True
             WebsiteConfiguration:
-                IndexDocument: connectflows.html
+                IndexDocument: contactflowapi.html
                 ErrorDocument: error.html
  
  
@@ -165,7 +165,7 @@ Resources:
                 Prefix: 'logs/'
                 IncludeCookies: 'true'
             Comment: CloudFront for contact flow apis
-            DefaultRootObject: connectflows.html
+            DefaultRootObject: contactflowapi.html
             DefaultCacheBehavior:
                 AllowedMethods:
                     - DELETE
