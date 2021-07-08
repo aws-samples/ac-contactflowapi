@@ -106,6 +106,8 @@ Resources:
     createWebSiteS3Bucket:
         Type: 'AWS::S3::Bucket'
         Properties:
+            VersioningConfiguration:
+                Status: Enabled        
             BucketName: !Ref CFS3BucketForWebSite
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: True
