@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >
-  "Amazon Connect contact flow api's demo"
+  Amazon Connect contact flow APIs demo
 
 Mappings: 
   FunctionMap:
@@ -10,8 +10,8 @@ Mappings:
  
 Parameters:
   CFS3BucketForWebSite:
-    Default:  "contactflowapi-website"
     Type: String
+    Default:  "contactflowapi-website"
     AllowedPattern: '(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)'
     ConstraintDescription: 'Invalid S3 Bucket name'
     Description: Enter the (globally unique) name you would like to use for the Amazon S3 bucket where we will store the website assets and the sample contact flow. This template will fail to deploy if the bucket name you chose is currently in use.
@@ -56,7 +56,7 @@ Outputs:
         - ''
         - - 'https://'
           - !GetAtt [CFCloudFrontDistribution, DomainName]
-          - '/connectflows.html'
+          - '/contactflowapi.html'
       
   DDBForBackup:
       Description: Endpoint for Cloudfront distribution
@@ -106,6 +106,8 @@ Resources:
     createWebSiteS3Bucket:
         Type: 'AWS::S3::Bucket'
         Properties:
+            VersioningConfiguration:
+                Status: Enabled        
             BucketName: !Ref CFS3BucketForWebSite
             VersioningConfiguration:
               Status : Enabled
@@ -119,7 +121,7 @@ Resources:
                 IgnorePublicAcls: True
                 RestrictPublicBuckets: True
             WebsiteConfiguration:
-                IndexDocument: connectflows.html
+                IndexDocument: contactflowapi.html
                 ErrorDocument: error.html
  
  
@@ -171,7 +173,7 @@ Resources:
                 Prefix: 'logs/'
                 IncludeCookies: 'true'
             Comment: CloudFront for contact flow apis
-            DefaultRootObject: connectflows.html
+            DefaultRootObject: contactflowapi.html
             DefaultCacheBehavior:
                 AllowedMethods:
                     - DELETE
