@@ -107,6 +107,12 @@ Resources:
         Type: 'AWS::S3::Bucket'
         Properties:
             BucketName: !Ref CFS3BucketForWebSite
+            VersioningConfiguration:
+              Status : Enabled
+            BucketEncryption:
+              ServerSideEncryptionConfiguration:
+              - ServerSideEncryptionByDefault:
+                  SSEAlgorithm: AES256
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: True
                 BlockPublicPolicy: True
